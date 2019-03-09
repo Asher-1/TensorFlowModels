@@ -16,7 +16,7 @@
 r"""Tool to export an object detection model for inference.
 
 Prepares an object detection tensorflow graph for inference using model
-configuration and a trained checkpoint. Outputs inference
+configuration and an optional trained checkpoint. Outputs inference
 graph, associated checkpoint files, a frozen inference graph and a
 SavedModel (https://tensorflow.github.io/serving/serving_basic.html).
 
@@ -59,7 +59,7 @@ python export_inference_graph \
 The expected output would be in the directory
 path/to/exported_model_directory (which is created if it does not exist)
 with contents:
- - inference_graph.pbtxt
+ - graph.pbtxt
  - model.ckpt.data-00000-of-00001
  - model.ckpt.info
  - model.ckpt.meta
@@ -99,6 +99,27 @@ from object_detection.protos import pipeline_pb2
 slim = tf.contrib.slim
 flags = tf.app.flags
 
+# 模型导出参数设置
+# 导出模型1
+# pipeline_config_path = 'datasets/faster_rcnn_inception_v2_coco_2012.config'
+# trained_checkpoint_prefix = 'G:/develop/PycharmProjects/datasets/result_outputs/object_detection_output/faster_rcnn_inception_v2_train_output_2012/model.ckpt-5015'
+# output_directory = 'G:/develop/PycharmProjects/datasets/result_outputs/object_detection_output/faster_rcnn_inception_v2_train_output_2012/'
+# 导出模型2
+# pipeline_config_path = 'datasets/faster_rcnn_inception_v2_coco_2012.config'
+# trained_checkpoint_prefix = 'G:/develop/PycharmProjects/datasets/result_outputs/object_detection_output/ssd_inception_v2_train_output_2012/model.ckpt-5015'
+# output_directory = 'G:/develop/PycharmProjects/datasets/result_outputs/object_detection_output/ssd_inception_v2_train_output_2012/'
+
+# 导出模型3
+# pipeline_config_path = 'datasets/faster_rcnn_resnet50_coco_2012.config'
+# trained_checkpoint_prefix = 'G:\develop\PycharmProjects\datasets\result_outputs\object_detection_output\faster_rcnn_resnet50_train_output_2012/model.ckpt-56220'
+# output_directory = 'G:\develop\PycharmProjects\datasets\result_outputs\object_detection_output\faster_rcnn_resnet50_train_output_2012/'
+
+# 导出模型4
+pipeline_config_path = 'datasets/cocoapi-master/faster_rcnn_inception_v2_coco.config'
+trained_checkpoint_prefix = 'G:/develop/PycharmProjects/datasets/result_outputs/object_detection_output/faster_rcnn_inception_v2_coco_model_output/model.ckpt-70853'
+output_directory = 'G:/develop/PycharmProjects/datasets/result_outputs/object_detection_output/faster_rcnn_inception_v2_coco_model_output/'
+
+
 flags.DEFINE_string('input_type', 'image_tensor', 'Type of input node. Can be '
                     'one of [`image_tensor`, `encoded_image_string_tensor`, '
                     '`tf_example`]')
@@ -110,18 +131,16 @@ flags.DEFINE_string('input_shape', None,
                     'dimensions. If not specified, for an `image_tensor, the '
                     'default shape will be partially specified as '
                     '`[None, None, None, 3]`.')
-flags.DEFINE_string('pipeline_config_path', None,
+flags.DEFINE_string('pipeline_config_path', pipeline_config_path,
                     'Path to a pipeline_pb2.TrainEvalPipelineConfig config '
                     'file.')
-flags.DEFINE_string('trained_checkpoint_prefix', None,
+flags.DEFINE_string('trained_checkpoint_prefix', trained_checkpoint_prefix,
                     'Path to trained checkpoint, typically of the form '
                     'path/to/model.ckpt')
-flags.DEFINE_string('output_directory', None, 'Path to write outputs.')
+flags.DEFINE_string('output_directory', output_directory, 'Path to write outputs.')
 flags.DEFINE_string('config_override', '',
                     'pipeline_pb2.TrainEvalPipelineConfig '
                     'text proto to override pipeline_config_path.')
-flags.DEFINE_boolean('write_inference_graph', False,
-                     'If true, writes inference graph to disk.')
 tf.app.flags.mark_flag_as_required('pipeline_config_path')
 tf.app.flags.mark_flag_as_required('trained_checkpoint_prefix')
 tf.app.flags.mark_flag_as_required('output_directory')
@@ -140,10 +159,9 @@ def main(_):
     ]
   else:
     input_shape = None
-  exporter.export_inference_graph(
-      FLAGS.input_type, pipeline_config, FLAGS.trained_checkpoint_prefix,
-      FLAGS.output_directory, input_shape=input_shape,
-      write_inference_graph=FLAGS.write_inference_graph)
+  exporter.export_inference_graph(FLAGS.input_type, pipeline_config,
+                                  FLAGS.trained_checkpoint_prefix,
+                                  FLAGS.output_directory, input_shape)
 
 
 if __name__ == '__main__':
